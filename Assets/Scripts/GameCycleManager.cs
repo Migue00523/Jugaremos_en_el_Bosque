@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using System.Collections;
 
@@ -68,7 +67,15 @@ public class GameCycleManager : MonoBehaviour
 
                 Debug.Log("HIDE PHASE STARTED!");
 
-                yield break;
+                foreach (NPCWander npc in npcs)
+                {
+                    if (npc != null)
+                    {
+                        npc.HideInNearestBush();
+                    }
+                }
+
+yield break;
             }
 
             if (preparationResponses != null &&

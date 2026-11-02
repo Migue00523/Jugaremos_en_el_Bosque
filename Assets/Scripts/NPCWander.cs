@@ -16,6 +16,8 @@ public class NPCWander : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
 
+    private bool canMove = true;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -31,8 +33,21 @@ public class NPCWander : MonoBehaviour
     {
         if (animator != null)
         {
-            bool isMoving = agent.velocity.sqrMagnitude > 0.05f;
-            animator.SetBool("IsMoving", isMoving);
+            bool moving = canMove &&
+                          agent.velocity.sqrMagnitude > 0.05f;
+
+            animator.SetBool("IsMoving", moving);
+        }
+    }
+
+    public void SetMovementEnabled(bool enabled)
+    {
+        canMove = enabled;
+        agent.isStopped = !enabled;
+
+        if (!enabled && animator != null)
+        {
+            animator.SetBool("IsMoving", false);
         }
     }
 
@@ -40,11 +55,19 @@ public class NPCWander : MonoBehaviour
     {
         while (true)
         {
+            if (!canMove)
+            {
+                yield return null;
+                continue;
+            }
+
             Vector3 center = wanderCenter != null
                 ? wanderCenter.position
                 : transform.position;
 
-            Vector3 randomDirection = Random.insideUnitSphere * wanderRadius;
+            Vector3 randomDirection =
+                Random.insideUnitSphere * wanderRadius;
+
             randomDirection += center;
 
             NavMeshHit hit;
@@ -65,17 +88,16 @@ public class NPCWander : MonoBehaviour
                 if (agent.hasPath &&
                     agent.pathStatus == NavMeshPathStatus.PathComplete)
                 {
-                    while (agent.remainingDistance >
-                           agent.stoppingDistance + 0.2f)
-                    {
-                        yield return null;
-                    }
+                    while (canMove && agent.remainingDistance > agent.stoppingDistance + 0.2f)
+                        {
+                            yield return null;
+                        }
                 }
             }
 
             float wait = Random.Range(minWaitTime, waitTime);
+
             yield return new WaitForSeconds(wait);
         }
     }
 }
-

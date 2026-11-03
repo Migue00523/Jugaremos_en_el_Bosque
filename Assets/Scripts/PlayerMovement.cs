@@ -20,6 +20,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 verticalVelocity;
     private bool canMove = true;
 
+    public bool IsTryingToMove { get; private set; }
+
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
@@ -49,6 +51,8 @@ public class PlayerMovement : MonoBehaviour
             if (keyboardInput != Vector2.zero)
                 input = keyboardInput.normalized;
         }
+
+        IsTryingToMove = input.magnitude > 0.15f;
 
         Move(input);
     }

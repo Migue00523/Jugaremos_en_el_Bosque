@@ -8,6 +8,7 @@ public class PlayerHidingController : MonoBehaviour
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private GameCycleManager gameCycleManager;
     [SerializeField] private CameraFollow cameraFollow;
+    [SerializeField] private MicrophoneNoiseDetector microphoneDetector;
     
     [Header("Hidden Visual")]
     [SerializeField] private GameObject hiddenPanel;
@@ -61,6 +62,9 @@ public class PlayerHidingController : MonoBehaviour
         if (hiddenPanel != null)
             hiddenPanel.SetActive(true);
 
+        if (microphoneDetector != null)
+            microphoneDetector.SetDetectionActive(true);
+
         if (characterVisibility == null)
         {
             Debug.LogError("CharacterVisibility is not assigned!");
@@ -93,6 +97,9 @@ public class PlayerHidingController : MonoBehaviour
 
         if (playerMovement != null)
             playerMovement.SetMovementEnabled(true);
+
+        if (microphoneDetector != null)
+            microphoneDetector.SetDetectionActive(false);
 
         if (hiddenPanel != null)
             hiddenPanel.SetActive(false);

@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using System.Collections;
 
@@ -6,6 +7,10 @@ public class GameCycleManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip songClip;
+
+    [Header("Player References")]
+    [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private GameOverManager gameOverManager;
 
     [Header("Wolf Responses")]
     [SerializeField] private AudioClip[] preparationResponses;
@@ -21,13 +26,12 @@ public class GameCycleManager : MonoBehaviour
     [SerializeField] private float pauseBetweenRounds = 1.5f;
 
     public bool IsHidePhase { get; private set; }
+    public bool IsWolfResponding { get; private set; }
 
     private void Start()
     {
         if (audioSource == null)
-        {
             audioSource = GetComponent<AudioSource>();
-        }
 
         audioSource.playOnAwake = false;
         audioSource.loop = false;
@@ -40,6 +44,11 @@ public class GameCycleManager : MonoBehaviour
         while (!IsHidePhase)
         {
             // SONG PHASE
+            IsWolfResponding = false;
+
+            if (playerMovement != null)
+                playerMovement.SetMovementEnabled(true);
+
             Debug.Log("The song begins!");
 
             SetNPCMovement(true);
@@ -48,6 +57,11 @@ public class GameCycleManager : MonoBehaviour
 
             // WOLF RESPONSE PHASE
             SetNPCMovement(false);
+
+            IsWolfResponding = true;
+
+            if (playerMovement != null)
+                playerMovement.SetMovementEnabled(false);
 
             Debug.Log("The wolf is responding...");
 
@@ -63,6 +77,7 @@ public class GameCycleManager : MonoBehaviour
 
                 yield return PlayAudio(readyResponse);
 
+                IsWolfResponding = false;
                 IsHidePhase = true;
 
                 Debug.Log("HIDE PHASE STARTED!");
@@ -70,12 +85,14 @@ public class GameCycleManager : MonoBehaviour
                 foreach (NPCWander npc in npcs)
                 {
                     if (npc != null)
-                    {
                         npc.HideInNearestBush();
-                    }
                 }
 
-yield break;
+                // El jugador puede moverse para buscar un arbusto.
+                if (playerMovement != null)
+                    playerMovement.SetMovementEnabled(true);
+
+                yield break;
             }
 
             if (preparationResponses != null &&
@@ -94,6 +111,8 @@ yield break;
             {
                 Debug.LogWarning("No preparation responses assigned.");
             }
+
+            IsWolfResponding = false;
 
             yield return new WaitForSeconds(pauseBetweenRounds);
         }
@@ -120,10 +139,7 @@ yield break;
         foreach (NPCWander npc in npcs)
         {
             if (npc != null)
-            {
                 npc.SetMovementEnabled(enabled);
-            }
         }
     }
 }
-

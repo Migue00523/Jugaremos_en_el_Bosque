@@ -8,6 +8,12 @@ public class GameCycleManager : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip songClip;
 
+    [Header("Hideout Lights")]
+    [SerializeField] private GameObject[] hideoutLights;
+
+    [Header("Wolf")]
+    [SerializeField] private WolfHunter wolfHunter;
+
     [Header("Player References")]
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private GameOverManager gameOverManager;
@@ -36,7 +42,23 @@ public class GameCycleManager : MonoBehaviour
         audioSource.playOnAwake = false;
         audioSource.loop = false;
 
+        // Las luces comienzan apagadas.
+        SetHideoutLights(false);
+
         StartCoroutine(GameLoop());
+    }
+
+    // Enciende o apaga las luces de los escondites.
+    private void SetHideoutLights(bool state)
+    {
+        if (hideoutLights == null)
+            return;
+
+        foreach (GameObject lightObject in hideoutLights)
+        {
+            if (lightObject != null)
+                lightObject.SetActive(state);
+        }
     }
 
     private IEnumerator GameLoop()
@@ -45,6 +67,8 @@ public class GameCycleManager : MonoBehaviour
         {
             // SONG PHASE
             IsWolfResponding = false;
+
+            SetHideoutLights(false);
 
             if (playerMovement != null)
                 playerMovement.SetMovementEnabled(true);
@@ -80,15 +104,22 @@ public class GameCycleManager : MonoBehaviour
                 IsWolfResponding = false;
                 IsHidePhase = true;
 
+                // Encender las luces de los escondites.
+                SetHideoutLights(true);
+
+                if (wolfHunter != null)
+                    wolfHunter.StartHunting();
+
                 Debug.Log("HIDE PHASE STARTED!");
 
+                // Los NPC buscan el arbusto más cercano.
                 foreach (NPCWander npc in npcs)
                 {
                     if (npc != null)
                         npc.HideInNearestBush();
                 }
 
-                // El jugador puede moverse para buscar un arbusto.
+                // El jugador puede buscar un escondite.
                 if (playerMovement != null)
                     playerMovement.SetMovementEnabled(true);
 

@@ -5,12 +5,12 @@ public class ButtonsManager : MonoBehaviour
 {
     public void StartGame()
     {
-        SceneManager.LoadScene("Scene1");
+        SceneManager.LoadScene("Reglas");
     }
 
-    public void OpenOptions()
+    public void Continue()
     {
-        Debug.Log("Abrir menú de opciones");
+        SceneManager.LoadScene("Scene1");
     }
 
     public void GameOver()
